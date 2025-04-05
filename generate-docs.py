@@ -33,9 +33,8 @@ def load_config(config_path):
         print("Using default configuration.")
         return None
     except yaml.YAMLError as e:
-        print(f"Error parsing YAML configuration: {e}")
-        print("Using default configuration.")
-        return None
+    except yaml.YAMLError as e:
+        raise yaml.YAMLError(f"Error parsing YAML configuration: {e}") from e
 
 def create_directory_structure(config=None, base_dir='.', verbose=False):
     """Create the necessary directories if they don't exist."""
