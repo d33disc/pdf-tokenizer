@@ -1,21 +1,51 @@
 import os
 import sys
+import argparse
 
-def create_directory_structure():
-  """Create the necessary directories if they don't exist."""
-  directories = ['docs', 'src', 'tests']
-  for directory in directories:
-      os.makedirs(directory, exist_ok=True)
-      print(f"Created directory: {directory}")
+def parse_arguments():
+    """Parse command line arguments."""
+    parser = argparse.ArgumentParser(description='Generate project documentation files.')
+    parser.add_argument('-o', '--output-dir', default='.', 
+                        help='Output directory for generated files (default: current directory)')
+    parser.add_argument('-f', '--force', action='store_true',
+                        help='Force overwrite of existing files without prompting')
+    parser.add_argument('--readme-only', action='store_true',
+                        help='Generate only the README.md file')
+    parser.add_argument('--skip-readme', action='store_true',
+                        help='Skip generating README.md file')
+    parser.add_argument('-v', '--verbose', action='store_true',
+                        help='Enable verbose output')
+    
+    return parser.parse_args()
 
-def write_file(filepath, content):
-  """Write content to a file, creating parent directories if needed."""
-  dirname = os.path.dirname(filepath)
-  if dirname:  # Only try to create directory if there is a directory component
-    os.makedirs(dirname, exist_ok=True)
-  with open(filepath, 'w', encoding='utf-8') as f:
-      f.write(content)
-  print(f"Created file: {filepath}")
+def create_directory_structure(base_dir='.', verbose=False):
+    """Create the necessary directories if they don't exist."""
+    directories = ['docs', 'src', 'tests']
+    for directory in directories:
+        full_path = os.path.join(base_dir, directory)
+        os.makedirs(full_path, exist_ok=True)
+        if verbose:
+            print(f"Created directory: {full_path}")
+
+def write_file(filepath, content, force=False, verbose=False):
+    """Write content to a file, creating parent directories if needed."""
+    # Check if file exists and force flag is not set
+    if os.path.exists(filepath) and not force:
+        response = input(f"File {filepath} already exists. Overwrite? (y/n): ")
+        if response.lower() != 'y':
+            print(f"Skipping file: {filepath}")
+            return False
+    
+    dirname = os.path.dirname(filepath)
+    if dirname:  # Only try to create directory if there is a directory component
+        os.makedirs(dirname, exist_ok=True)
+    
+    with open(filepath, 'w', encoding='utf-8') as f:
+        f.write(content)
+    
+    if verbose:
+        print(f"Created file: {filepath}")
+    return True
 
 # File contents
 README_CONTENT = """# High-Performance Document Processing System
@@ -234,32 +264,73 @@ SOFTWARE.
 def main():
   """Generate all documentation files."""
   try:
+      # Parse command-line arguments
+      args = parse_arguments()
+      
       # Create directory structure
-      create_directory_structure()
+      create_directory_structure(base_dir=args.output_dir, verbose=args.verbose)
 
       # Define files and their content
-      files = {
-          'README.md': README_CONTENT,
-          'docs/INSTALLATION.md': INSTALLATION_CONTENT,
-          'docs/USAGE.md': USAGE_CONTENT,
-          'docs/API.md': API_CONTENT,
-          'CODE_OF_CONDUCT.md': CODE_OF_CONDUCT_CONTENT,
-          'CONTRIBUTING.md': CONTRIBUTING_CONTENT,
-          'LICENSE': LICENSE_CONTENT
-      }
+      files = {}
+      
+      # Skip README if requested
+      if not args.skip_readme:
+          files['README.md'] = README_CONTENT
+      
+      # If only README was requested, don't add other files
+      if not args.readme_only:
+          files.update({
+              'docs/INSTALLATION.md': INSTALLATION_CONTENT,
+              'docs/USAGE.md': USAGE_CONTENT,
+              'docs/API.md': API_CONTENT,
+              'CODE_OF_CONDUCT.md': CODE_OF_CONDUCT_CONTENT,
+              'CONTRIBUTING.md': CONTRIBUTING_CONTENT,
+              'LICENSE': LICENSE_CONTENT
+          })
 
       # Create each file
+      generated_files = []
       for filepath, content in files.items():
-          write_file(filepath, content)
+          full_path = os.path.join(args.output_dir, filepath)
+          if write_file(full_path, content, force=args.force, verbose=args.verbose):
+              generated_files.append(full_path)
 
-      print("\nDocumentation files generated successfully!")
-      print("\nGenerated files:")
-      for filepath in files.keys():
-          print(f"- {filepath}")
+      # Only show summary if not in verbose mode (otherwise it's redundant)
+      if not args.verbose:
+          print("\nDocumentation files generated successfully!")
+      
+      if generated_files:
+          print("\nGenerated files:")
+          for filepath in generated_files:
+              print(f"- {filepath}")
+      else:
+          print("\nNo files were generated.")
 
+  except KeyboardInterrupt:
+      print("\nOperation cancelled by user.")
+      sys.exit(0)
   except Exception as e:
       print(f"Error generating documentation: {e}", file=sys.stderr)
       sys.exit(1)
 
 if __name__ == '__main__':
   main()
+
+# Usage examples:
+# Generate all documentation to current directory:
+#   python generate-docs.py
+#
+# Generate documentation to a specific directory:
+#   python generate-docs.py -o /path/to/project
+#
+# Generate only README.md:
+#   python generate-docs.py --readme-only
+#
+# Generate all documentation except README.md:
+#   python generate-docs.py --skip-readme
+#
+# Force overwrite of existing files:
+#   python generate-docs.py -f
+#
+# Generate with verbose output:
+#   python generate-docs.py -v
