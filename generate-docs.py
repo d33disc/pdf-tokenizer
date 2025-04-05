@@ -28,10 +28,8 @@ def load_config(config_path):
         with open(config_path, 'r', encoding='utf-8') as f:
             config = yaml.safe_load(f)
         return config
-    except FileNotFoundError:
-        print(f"Configuration file not found: {config_path}")
-        print("Using default configuration.")
-        return None
+    except FileNotFoundError as e:
+        raise FileNotFoundError(f"Configuration file not found: {config_path}") from e
     except yaml.YAMLError as e:
     except yaml.YAMLError as e:
         raise yaml.YAMLError(f"Error parsing YAML configuration: {e}") from e
