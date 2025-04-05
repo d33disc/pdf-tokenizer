@@ -28,11 +28,15 @@ def create_directory_structure(base_dir='.', verbose=False):
             print(f"Created directory: {full_path}")
 
 def write_file(filepath, content, force=False, verbose=False):
-    """Write content to a file, creating parent directories if needed."""
-    # Check if file exists and force flag is not set
-    if os.path.exists(filepath) and not force:
-        response = input(f"File {filepath} already exists. Overwrite? (y/n): ")
-        if response.lower() != 'y':
+        response = input(f"File {filepath} already exists. Overwrite? (y/n/a/s): ").lower()
+        if response == 'y':
+            pass  # Proceed with overwrite
+        elif response == 'a':
+            force = True # Set force to True to overwrite all
+        elif response == 's':
+            print(f"Skipping file: {filepath}")
+            return False
+        else:
             print(f"Skipping file: {filepath}")
             return False
     
