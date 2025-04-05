@@ -313,7 +313,10 @@ def main():
   except KeyboardInterrupt:
       print("\nOperation cancelled by user.")
       sys.exit(0)
+      import logging
+      logging.basicConfig(level=logging.ERROR, format='%(asctime)s - %(levelname)s - %(message)s')
   except Exception as e:
+      logging.error(f"Error generating documentation: {e}", exc_info=True)
       print(f"Error generating documentation: {e}", file=sys.stderr)
       sys.exit(1)
 
