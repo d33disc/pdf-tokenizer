@@ -24,3 +24,22 @@ Thank you for considering contributing to our project! This document provides gu
  source venv/bin/activate  # or `venv\Scripts\activate` on Windows
  pip install -r requirements-dev.txt
  ```
+
+## Force Committing Changes
+
+To force commit all changes in Git, follow these steps:
+
+1. Stage all changes:
+ ```bash
+ git add .
+ ```
+
+2. Commit with a message and bypass pre-commit hooks:
+ ```bash
+ git commit -m "Your commit message" --no-verify
+ ```
+
+3. Push the changes to the remote repository:
+ ```bash
+ git push
+ ```
