@@ -183,7 +183,7 @@ result = processor.process_document(document_content)
 - [Installation Guide](./docs/INSTALLATION.md)
 - [Usage Guide](./docs/USAGE.md)
 - [API Documentation](./docs/API.md)
-- [Contributing Guidelines](./CONTRIBUTING.md)
+- [Contributing Guidelines](./docs/CONTRIBUTING.md)
 
 ## License
 This project is licensed under the MIT License - see the [LICENSE](./LICENSE) file for details.
@@ -404,6 +404,26 @@ def main():
         # Create each file
         generated_files = []
         for filepath, content in files.items():
+            if not args.force and os.path.exists(filepath):
+                print(f"Conflict detected: {filepath} already exists.")
+                try:
+                    # Attempt to resolve conflict automatically
+                    with open(filepath, 'r', encoding='utf-8') as f:
+                        existing_content = f.read()
+                    if existing_content == content:
+                        print(f"File {filepath} is already up-to-date.")
+                        continue
+                    else:
+                        print(f"File {filepath} has conflicting changes.")
+                        response = input(f"Overwrite {filepath}? (y/n): ")
+                        if response.lower() != 'y':
+                            print(f"Skipping file: {filepath}")
+                            continue
+                except Exception as e:
+                    print(f"Error reading existing file {filepath}: {e}")
+                    print("Please resolve the conflict manually.")
+                    continue
+
             full_path = os.path.join(args.output_dir, filepath)
             if write_file(full_path, content, force=args.force, verbose=args.verbose):
                 generated_files.append(full_path)
