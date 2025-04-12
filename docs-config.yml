@@ -60,6 +60,16 @@ files:
     path: "LICENSE"
     type: "MIT"  # Options: MIT, Apache-2.0, GPL-3.0
 
+  pdf_benchmarks:
+    enabled: true
+    path: "docs/PDF_BENCHMARKS.md"
+    title: "PDF Benchmarks"
+
+  pdf_tokenization:
+    enabled: true
+    path: "docs/PDF_TOKENIZATION.md"
+    title: "PDF Tokenization"
+
 # Content Sections
 content:
   overview: |
@@ -109,6 +119,10 @@ content:
       path: "./docs/API.md"
     - name: "Contributing Guidelines"
       path: "./CONTRIBUTING.md"
+    - name: "PDF Benchmarks"
+      path: "./docs/PDF_BENCHMARKS.md"
+    - name: "PDF Tokenization"
+      path: "./docs/PDF_TOKENIZATION.md"
 
 # Dependencies
 dependencies:
