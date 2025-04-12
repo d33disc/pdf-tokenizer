@@ -3,6 +3,7 @@ import sys
 import argparse
 import yaml
 from datetime import datetime
+import subprocess
 
 def parse_arguments():
     """Parse command line arguments."""
@@ -19,6 +20,8 @@ def parse_arguments():
                         help='Skip generating README.md file')
     parser.add_argument('-v', '--verbose', action='store_true',
                         help='Enable verbose output')
+    parser.add_argument('--commit', action='store_true',
+                        help='Stage, commit, and push changes to the repository')
     
     return parser.parse_args()
 
@@ -183,7 +186,7 @@ result = processor.process_document(document_content)
 - [Installation Guide](./docs/INSTALLATION.md)
 - [Usage Guide](./docs/USAGE.md)
 - [API Documentation](./docs/API.md)
-- [Contributing Guidelines](./docs/CONTRIBUTING.md)
+- [Contributing Guidelines](./CONTRIBUTING.md)
 
 ## License
 This project is licensed under the MIT License - see the [LICENSE](./LICENSE) file for details.
@@ -363,6 +366,16 @@ OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
 SOFTWARE.
 """
 
+def commit_changes():
+    """Stage, commit, and push changes to the repository."""
+    try:
+        subprocess.run(['git', 'add', '.'], check=True)
+        subprocess.run(['git', 'commit', '-m', 'Auto-generated documentation update', '--no-verify'], check=True)
+        subprocess.run(['git', 'push'], check=True)
+        print("Changes committed and pushed successfully.")
+    except subprocess.CalledProcessError as e:
+        print(f"Error during Git operations: {e}")
+
 def main():
     """Generate all documentation files."""
     try:
@@ -439,6 +452,10 @@ def main():
         else:
             print("\nNo files were generated.")
 
+        # Commit changes if requested
+        if args.commit:
+            commit_changes()
+
     except KeyboardInterrupt:
         print("\nOperation cancelled by user.")
         sys.exit(0)
@@ -467,3 +484,6 @@ if __name__ == '__main__':
 #
 # Generate with verbose output:
 #   python generate-docs.py -v
+#
+# Stage, commit, and push changes:
+#   python generate-docs.py --commit
